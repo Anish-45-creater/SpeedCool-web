@@ -83,7 +83,7 @@ update public.profiles set role = 'driver'
 -- So Dispatch has somewhere to send a shipment for the demo driver
 -- to see on their route. Attaches to the first seeded vehicle.
 update public.vehicles set driver_id = (select id from auth.users where email = 'driver@speedcool.com')
-  where id = (select id from public.vehicles order by created_at limit 1);
+  where id = (select id from public.vehicles order by plate_number limit 1);
 
 -- ============================================================
 -- Done. Sign in with:
