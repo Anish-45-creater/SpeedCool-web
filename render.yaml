@@ -1,0 +1,18 @@
+# Render Blueprint — deploys the React app as a FREE static site.
+# Dashboard > New > Blueprint > point at this repo, or create a
+# "Static Site" manually with the same settings.
+services:
+  - type: web
+    name: speedcool-tracking
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_SUPABASE_URL
+        sync: false   # paste your Supabase project URL in the Render dashboard
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false   # paste your Supabase anon/public key in the Render dashboard
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
