@@ -602,9 +602,78 @@ insert into public.vehicles (plate_number, label) values
   ('DL-02-EF-9012', 'Delhi Van 1')
 on conflict do nothing;
 
+-- ---------- 11. STATIC DEMO LOGINS ----------
+-- One ready-to-use account per role, so you can sign in immediately
+-- without manually signing up and promoting each one via SQL/Admin.
+-- ⚠️ Demo credentials only — rotate or delete these before using
+-- this project with real customer data (see note at the bottom).
+create extension if not exists pgcrypto;
+
+insert into auth.users (
+  instance_id, id, aud, role, email, encrypted_password,
+  email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+  created_at, updated_at,
+  confirmation_token, recovery_token, email_change, email_change_token_new
+)
+values
+  ('00000000-0000-0000-0000-000000000000', gen_random_uuid(), 'authenticated', 'authenticated',
+   'ops@speedcool.com', crypt('Speedcool@123', gen_salt('bf')),
+   now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Demo Ops","phone":"+91 90000 00002"}',
+   now(), now(), '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000', gen_random_uuid(), 'authenticated', 'authenticated',
+   'warehouse@speedcool.com', crypt('Speedcool@123', gen_salt('bf')),
+   now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Demo Warehouse","phone":"+91 90000 00003"}',
+   now(), now(), '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000', gen_random_uuid(), 'authenticated', 'authenticated',
+   'driver@speedcool.com', crypt('Speedcool@123', gen_salt('bf')),
+   now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Demo Driver","phone":"+91 90000 00004"}',
+   now(), now(), '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000', gen_random_uuid(), 'authenticated', 'authenticated',
+   'customer@speedcool.com', crypt('Speedcool@123', gen_salt('bf')),
+   now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Demo Customer","phone":"+91 90000 00005"}',
+   now(), now(), '', '', '', '')
+on conflict (email) do nothing;
+
+-- Required alongside auth.users for email/password sign-in to work.
+insert into auth.identities (
+  id, provider_id, user_id, identity_data, provider, created_at, updated_at, last_sign_in_at
+)
+select
+  gen_random_uuid(), u.id::text, u.id,
+  jsonb_build_object('sub', u.id::text, 'email', u.email),
+  'email', now(), now(), now()
+from auth.users u
+where u.email in (
+  'ops@speedcool.com','warehouse@speedcool.com',
+  'driver@speedcool.com','customer@speedcool.com'
+)
+on conflict do nothing;
+
+-- The on_auth_user_created trigger above already created a
+-- 'customer' profile for each user with their full_name/phone —
+-- this promotes the 3 staff accounts.
+update public.profiles set role = 'ops'
+  where id = (select id from auth.users where email = 'ops@speedcool.com');
+update public.profiles set role = 'warehouse'
+  where id = (select id from auth.users where email = 'warehouse@speedcool.com');
+update public.profiles set role = 'driver'
+  where id = (select id from auth.users where email = 'driver@speedcool.com');
+-- customer@speedcool.com stays on the default 'customer' role.
+
+-- Give the demo driver a vehicle so Dispatch has somewhere to send
+-- a shipment for them to see on their route.
+update public.vehicles set driver_id = (select id from auth.users where email = 'driver@speedcool.com')
+  where id = (select id from public.vehicles order by created_at limit 1);
+
 -- ============================================================
--- AFTER RUNNING: sign up your first user in the app, then make
--- them an admin by running (replace the email):
+-- Demo logins created above — sign in with:
+--   ops@speedcool.com        / Speedcool@123
+--   warehouse@speedcool.com  / Speedcool@123
+--   driver@speedcool.com     / Speedcool@123
+--   customer@speedcool.com   / Speedcool@123
+--
+-- Want an admin too? Sign up with your own email in the app, then
+-- run (replace the email):
 --
 --   update public.profiles set role = 'admin'
 --   where id = (select id from auth.users where email = 'you@company.com');

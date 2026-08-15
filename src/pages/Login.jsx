@@ -4,6 +4,16 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { ROLE_HOME } from '../lib/constants'
 
+// Static demo logins seeded by supabase/migrations/0003_seed_demo_users.sql.
+// Set VITE_SHOW_DEMO_LOGINS=false in .env to hide this panel (e.g. in prod).
+const DEMO_ACCOUNTS = [
+  { role: 'Ops', email: 'ops@speedcool.com', password: 'Speedcool@123' },
+  { role: 'Warehouse', email: 'warehouse@speedcool.com', password: 'Speedcool@123' },
+  { role: 'Driver', email: 'driver@speedcool.com', password: 'Speedcool@123' },
+  { role: 'Customer', email: 'customer@speedcool.com', password: 'Speedcool@123' },
+]
+const SHOW_DEMO_LOGINS = import.meta.env.VITE_SHOW_DEMO_LOGINS !== 'false'
+
 export default function Login() {
   const { session, profile } = useAuth()
   const [mode, setMode] = useState('signin') // signin | signup | forgot
@@ -22,6 +32,16 @@ export default function Login() {
   const goHome = async (userId) => {
     const { data: p } = await supabase.from('profiles').select('role').eq('id', userId).single()
     navigate(ROLE_HOME[p?.role] ?? '/my')
+  }
+
+  const signInAs = async (account) => {
+    setBusy(true); setMsg(null)
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: account.email, password: account.password,
+    })
+    if (error) setMsg({ t: 'err', m: `${account.role} demo login failed: ${error.message}. Have you run supabase/migrations/0003_seed_demo_users.sql yet?` })
+    else await goHome(data.user.id)
+    setBusy(false)
   }
 
   const submit = async (e) => {
@@ -112,6 +132,39 @@ export default function Login() {
           <p className="small muted" style={{ textAlign: 'center', marginTop: 6 }}>
             <Link to="/">← Back to tracking</Link>
           </p>
+
+          {SHOW_DEMO_LOGINS && mode === 'signin' && (
+            <div style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid var(--line)' }}>
+              <p className="small muted" style={{ textAlign: 'center', marginBottom: 8 }}>
+                Demo accounts
+              </p>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--line)' }}>
+                    <th style={{ textAlign: 'left', padding: '4px 6px', color: 'var(--muted)', fontWeight: 600 }}>Sign in as</th>
+                    <th style={{ textAlign: 'left', padding: '4px 6px', color: 'var(--muted)', fontWeight: 600 }}>Password</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {DEMO_ACCOUNTS.map((a) => (
+                    <tr key={a.email} style={{ borderBottom: '1px solid var(--line)' }}>
+                      <td style={{ padding: '6px', fontFamily: 'var(--mono)' }}>{a.email}</td>
+                      <td style={{ padding: '6px', fontFamily: 'var(--mono)' }}>{a.password}</td>
+                      <td style={{ padding: '6px', textAlign: 'right' }}>
+                        <button
+                          type="button" className="btn ghost small"
+                          disabled={busy} onClick={() => signInAs(a)}
+                        >
+                          Sign in
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </div>
