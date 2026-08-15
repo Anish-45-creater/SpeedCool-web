@@ -632,7 +632,11 @@ values
    'customer@speedcool.com', crypt('Speedcool@123', gen_salt('bf')),
    now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Demo Customer","phone":"+91 90000 00005"}',
    now(), now(), '', '', '', '')
-on conflict (email) do nothing;
+-- No explicit column target: recent Supabase Auth builds enforce
+-- email uniqueness via a partial/expression index, not a plain
+-- unique constraint on the column, so ON CONFLICT (email) fails
+-- with 42P10. Omitting the target matches any unique violation.
+on conflict do nothing;
 
 -- Required alongside auth.users for email/password sign-in to work.
 insert into auth.identities (
