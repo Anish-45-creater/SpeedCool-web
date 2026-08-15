@@ -338,6 +338,51 @@ input:focus, select:focus, textarea:focus { border-color: var(--glacier); outlin
 .notif-item { padding: 10px 0; border-bottom: 1px solid var(--frost); font-size: 13.5px; }
 .notif-item .when { font-family: var(--mono); font-size: 11px; color: var(--muted); }
 
+/* ---------- modal (Delay / Cancel / Add / Edit flight) ---------- */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(14,31,43,0.55);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100; padding: 16px; animation: modal-fade 0.15s ease-out;
+}
+.modal {
+  background: var(--card); border-radius: 14px; width: 100%;
+  box-shadow: 0 20px 60px rgba(14,31,43,0.35);
+  animation: modal-pop 0.18s cubic-bezier(.2,.9,.3,1.2);
+  max-height: 90vh; overflow-y: auto;
+}
+.modal-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 18px 20px 14px; border-bottom: 1px solid var(--line);
+}
+.modal-close {
+  background: none; border: none; cursor: pointer; font-size: 16px;
+  color: var(--muted); line-height: 1; padding: 4px;
+}
+.modal-close:hover { color: var(--ink); }
+.modal-body { padding: 18px 20px 20px; }
+@keyframes modal-fade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes modal-pop { from { opacity: 0; transform: scale(0.96) translateY(6px) } to { opacity: 1; transform: none } }
+
+/* ---------- automatic re-routing: preview + status flow ---------- */
+.reroute-preview {
+  background: var(--frost); border: 1px solid var(--line); border-radius: 10px;
+  padding: 12px 14px; margin: 12px 0; font-size: 13px;
+}
+.reroute-flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.reroute-flow .step {
+  display: flex; align-items: center; gap: 6px; font-size: 12.5px;
+  padding: 5px 10px; border-radius: 999px; background: var(--card);
+  border: 1px solid var(--line); color: var(--ink-2);
+}
+.reroute-flow .arrow { color: var(--muted); }
+.spin { display: inline-block; animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
+.searching-dots::after {
+  content: ''; display: inline-block; width: 1em; text-align: left;
+  animation: dots 1.2s steps(4,end) infinite;
+}
+@keyframes dots { 0% { content: '' } 25% { content: '.' } 50% { content: '..' } 75%,100% { content: '...' } }
+
 /* ---------- responsive ---------- */
 @media (max-width: 900px) {
   .shell { flex-direction: column; }

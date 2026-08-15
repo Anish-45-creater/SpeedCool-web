@@ -56,6 +56,18 @@ export function fmt(ts) {
   })
 }
 
+export const FLIGHT_STATUS_LABELS = {
+  SCHEDULED: 'Scheduled',
+  BOARDING: 'Boarding',
+  DELAYED: 'Delayed',
+  DEPARTED: 'Departed',
+  EN_ROUTE: 'In transit',
+  LANDED: 'Arrived',
+  CANCELLED: 'Cancelled',
+  RE_ROUTED: 'Re-routed',
+  COMPLETED: 'Completed',
+}
+
 export const ROLE_HOME = {
   admin: '/ops',
   ops: '/ops',

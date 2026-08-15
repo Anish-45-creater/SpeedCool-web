@@ -17,6 +17,7 @@ export default function ShipmentDetail() {
   const [events, setEvents] = useState([])
   const [pod, setPod] = useState(null)
   const [podUrl, setPodUrl] = useState(null)
+  const [rerouteHistory, setRerouteHistory] = useState([])
   const [msg, setMsg] = useState(null)
   const [note, setNote] = useState('')
 
@@ -33,6 +34,13 @@ export default function ShipmentDetail() {
       const { data: signed } = await supabase.storage.from('pods')
         .createSignedUrl(p.signature_path, 3600)
       setPodUrl(signed?.signedUrl ?? null)
+    }
+    if (isStaff) {
+      const { data: rr } = await supabase
+        .from('flight_reroute_audit')
+        .select('*, original:flights!flight_reroute_audit_original_flight_id_fkey(flight_number), new:flights!flight_reroute_audit_new_flight_id_fkey(flight_number)')
+        .eq('shipment_id', id).order('created_at', { ascending: false })
+      setRerouteHistory(rr ?? [])
     }
   }
 
@@ -127,6 +135,28 @@ export default function ShipmentDetail() {
                   <button className="btn warn" onClick={raiseException}>Raise exception</button>
                 )}
               </div>
+            </div>
+          )}
+
+          {isStaff && rerouteHistory.length > 0 && (
+            <div className="card">
+              <h3>Re-routing history</h3>
+              <p className="small muted" style={{ marginTop: 4 }}>
+                Decisions made automatically by the flight re-routing engine — nobody picked these by hand.
+              </p>
+              {rerouteHistory.map((r) => (
+                <div key={r.id} style={{ padding: '8px 0', borderTop: '1px solid var(--frost)' }}>
+                  <div className="small">
+                    {r.reroute_type === 'AUTOMATIC_CANCELLATION' ? 'Cancellation' : 'Delay'} on{' '}
+                    <span className="mono">{r.original?.flight_number ?? '—'}</span>
+                    {r.alternative_found
+                      ? <> → auto re-routed to <span className="mono">{r.new?.flight_number}</span></>
+                      : <> → no alternative found at the time</>}
+                  </div>
+                  {r.reroute_reason && <div className="small muted">Reason: {r.reroute_reason}</div>}
+                  <div className="small muted mono">{fmt(r.created_at)}</div>
+                </div>
+              ))}
             </div>
           )}
 

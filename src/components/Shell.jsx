@@ -4,12 +4,12 @@ import { useAuth } from '../context/AuthContext'
 const NAV = {
   admin: [
     ['/ops', 'Live board'], ['/ops/new', 'New shipment'], ['/ops/manifests', 'Manifests'],
-    ['/ops/flights', 'Flights'], ['/ops/reroute', 'Reroute'], ['/ops/dispatch', 'Dispatch'], ['/ops/exceptions', 'Exceptions'],
+    ['/ops/flights', 'Flights'], ['/ops/reroute', 'Reroute Activity'], ['/ops/dispatch', 'Dispatch'], ['/ops/exceptions', 'Exceptions'],
     ['/warehouse', 'Scanner'], ['/admin', 'Admin'],
   ],
   ops: [
     ['/ops', 'Live board'], ['/ops/new', 'New shipment'], ['/ops/manifests', 'Manifests'],
-    ['/ops/flights', 'Flights'], ['/ops/reroute', 'Reroute'], ['/ops/dispatch', 'Dispatch'], ['/ops/exceptions', 'Exceptions'],
+    ['/ops/flights', 'Flights'], ['/ops/reroute', 'Reroute Activity'], ['/ops/dispatch', 'Dispatch'], ['/ops/exceptions', 'Exceptions'],
   ],
   warehouse: [['/warehouse', 'Scanner'], ['/warehouse/recent', 'Recent scans']],
   driver: [['/driver', 'My route']],

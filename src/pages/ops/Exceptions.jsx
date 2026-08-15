@@ -64,7 +64,7 @@ export default function Exceptions() {
           </p>
           {(lastEvent[s.id]?.note ?? '').toLowerCase().includes('flight') && (
             <Link to="/ops/reroute" className="btn ghost small" style={{ marginTop: 8, display: 'inline-block' }}>
-              Find an alternate flight →
+              View re-routing activity →
             </Link>
           )}
           <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
